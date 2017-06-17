@@ -3,12 +3,13 @@
 import {MongoClient, ObjectId} from 'mongodb'
 import express from "express";
 import session from "express-session";
-import graphqlHTTP from "express-graphql";
-import {buildSchema} from "graphql";
+import {graphqlExpress, graphiqlExpress} from "graphql-server-express";
 import uuid from "node-uuid";
 import passport from "passport";
 import bodyParser from "body-parser";
-// import cors from "cors";
+import cors from "cors";
+
+import schema from "./schema/schema";
 
 const MONGO_PASSWORD = "g&9#qL6A1rjQ6jlj@1fl";
 const MONGO_DATABASE = "corgo";
@@ -16,8 +17,12 @@ const MONGO_URL = `mongodb://admin:${MONGO_PASSWORD}@corgo-shard-00-00-lx3by.mon
 
 // require("./auth.js"); //see snippet below
 
-const app = express();
+const prepare = (o) => {
+  o._id = o._id.toString();
+  return o;
+}
 
+const app = express();
 app.use(session({
   genid: function(req) {
     return uuid.v4();
@@ -25,27 +30,14 @@ app.use(session({
   secret: "1$19Fn5Y#sErVk@C"
 }));
 
+app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Construct a schema, using GraphQL schema language
-var schema = buildSchema(`
-  type Query {
-    hello: String
-  }
-`);
+app.use("/graphql", bodyParser.json(), graphqlExpress({schema}));
 
-// The root provides a resolver function for each API endpoint
-var root = {
-  hello: () => {
-    return "Hello world!?!";
-  },
-};
-
-app.use("/graphql", graphqlHTTP({
-  schema: schema,
-  rootValue: root,
-  graphiql: true,
+app.use("/graphiql", graphiqlExpress({
+  endpointURL: "/graphql"
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }) );
