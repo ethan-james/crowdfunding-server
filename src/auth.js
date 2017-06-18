@@ -2,7 +2,7 @@ import passport from "passport";
 
 let LocalStrategy = require("passport-local").Strategy;
 
-import {DB} from "./schema/db.js";
+import {DB} from "./schema/schema.js";
 
 passport.use("local", new LocalStrategy(
   (username, password, done) => {
