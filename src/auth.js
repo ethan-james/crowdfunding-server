@@ -2,18 +2,26 @@ import passport from "passport";
 
 let LocalStrategy = require("passport-local").Strategy;
 
-import {DB} from "./schema/schema.js";
+import bcrypt from "bcrypt";
+import {find, insert} from "./db";
 
 passport.use("local", new LocalStrategy(
-  (username, password, done) => {
-    let checkPassword = DB.Users.checkPassword(username, password);
-    let getUser = checkPassword.then((is_login_valid) => {
-      if (is_login_valid) {
-        return DB.Users.getUserByUsername(username);
+  (email, password, done) => {
+    const error = new Error("invalid username or password");
+    
+    find("users", {email}).then(user => {
+      if (user) {
+        bcrypt.compare(password, user.password).then((result) => {
+          if (result) {
+            done(null, user);
+          } else {
+            done(error);
+          }
+        });
       } else {
-        throw new Error("invalid username or password");
+        done(error);
       }
-    }).then(user => done(null, user)).catch(err => done(err));
+    }).catch(err => done(err));
   }
 ));
 
