@@ -2,9 +2,8 @@
 
 import {MongoClient, ObjectId} from 'mongodb'
 
-const MONGO_PASSWORD = "R0lMrQCdFfMk0rvf";
 const MONGO_DATABASE = "corgo";
-const MONGO_URL = `mongodb://admin:${MONGO_PASSWORD}@corgo-shard-00-00-lx3by.mongodb.net:27017,corgo-shard-00-01-lx3by.mongodb.net:27017,corgo-shard-00-02-lx3by.mongodb.net:27017/${MONGO_DATABASE}?ssl=true&replicaSet=corgo-shard-0&authSource=admin`;
+const MONGO_URL = `mongodb://admin:${process.env.MONGO_PASSWORD}@corgo-shard-00-00-lx3by.mongodb.net:27017,corgo-shard-00-01-lx3by.mongodb.net:27017,corgo-shard-00-02-lx3by.mongodb.net:27017/${MONGO_DATABASE}?ssl=true&replicaSet=corgo-shard-0&authSource=admin`;
 
 let _db;
 
@@ -20,7 +19,7 @@ const prepare = (o) => {
     o._id = o._id.toString();
     o.id = o._id;
   }
-  
+
   return o;
 }
 
